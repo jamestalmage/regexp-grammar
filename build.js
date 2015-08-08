@@ -19,6 +19,6 @@ function output(path, options) {
 
 output(parserPath);
 
-output(debugParserPath, {allRules: true});
+output(debugParserPath, {allRules: true, fakeFactory:true});
 
 output(smallParserPath, {optimize: 'size'});

@@ -1,8 +1,10 @@
 var fs = require('fs');
 var unicode = require('./unicode-character-sets');
+var unicodeSymbols = require('./unicode-symbols');
 var path = require('path');
 
 var headerPath = path.resolve(__dirname, 'grammar_header.pegjs');
+var initializerPath = path.resolve(__dirname, 'grammar_initializer.js');
 
 function makeGrammar(cb) {
   fs.readFile(headerPath, function(err, header) {
@@ -13,11 +15,20 @@ function makeGrammar(cb) {
 
 function makeGrammarSync() {
   var header = fs.readFileSync(headerPath);
-  return _makeGrammar(header);
+  var initializer = fs.readFileSync(initializerPath);
+  console.log( _makeGrammar(initializer, header));
+  return _makeGrammar(initializer, header);
 }
 
-function _makeGrammar(header) {
-  return [ header,
+function _makeGrammar(initializer, header) {
+  return [
+    '{',
+    [
+      'var unicodeSymbolSets = ' + JSON.stringify(unicodeSymbols, null, 2),
+      initializer
+    ].join(';\n'),
+    '}',
+    header,
     'UnicodeLetter =\n  ' + unicode.unicodeLetter,
     'UnicodeCombiningMark =\n   ' + unicode.unicodeCombiningMark,
     'UnicodeDigit =\n  ' + unicode.unicodeDigit,
@@ -25,5 +36,5 @@ function _makeGrammar(header) {
   ].join('\n\n');
 }
 
-module.exports = makeGrammar;
+//module.exports = makeGrammar;
 module.exports.sync = makeGrammarSync;

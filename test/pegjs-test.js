@@ -55,7 +55,7 @@ describe('pegjs', function() {
     var empty = PEG.buildParser([
       'start = Disjunction',
       'Disjunction = Alternative "|" Disjunction / Alternative',
-      'Alternative = Term Alternative / Term / /*empty*/',
+      'Alternative = Term Alternative / Term / ""',
       'Term = "a" / "b" / "c"'
     ].join('\n'));
 
@@ -114,7 +114,4 @@ describe('pegjs', function() {
       '\u2029'
     );
   });
-
-
-
 });

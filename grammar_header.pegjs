@@ -1,9 +1,3 @@
-{
-  var factory = options.factory;
-  var flags = options.flags || {};
-  var fromCodePoint = String.fromCodePoint || options.fromCodePoint;
-}
-
 Pattern
   = Disjunction
 
@@ -14,7 +8,7 @@ Disjunction
 Alternative
   = term:Term alternative:Alternative { return factory.alternative(term, alternative); }
   / term:Term { return factory.alternative(term, null); }
-  / /*empty*/ { return factory.alternative(null, null); }
+  / '' { return factory.alternative(null, null); }
 
 Term
   = Assertion
@@ -59,16 +53,20 @@ AtomEscape
 
 CharacterEscape
   = ControlEscape
-  / 'c' ControlLetter
+  / 'c' ControlLetter { return c; }
   / HexEscapeSequence
   / UnicodeEscapeSequence
   / IdentityEscape
 
 ControlEscape
-  = [fnrtv]
+  = 'f' { return '\f'; }
+  / 'n' { return '\n'; }
+  / 'r' { return '\r'; }
+  / 't' { return '\t'; }
+  / 'v' { return '\v'; }
 
 ControlLetter
-  = [a-zA-Z]
+  = a:[a-zA-Z] { return fromCodePoint(a.toLowerCase().charCodeAt(0) - 96); }
 
 IdentityEscape
   = !IdentifierPart .
@@ -76,10 +74,10 @@ IdentityEscape
   / ZWNJ
 
 DecimalEscape
-  = d:DecimalIntegerLiteral !DecimalDigit { return d === 0 ? '\u0000' : factory.backRef(d); }
+  = d:DecimalIntegerLiteral !DecimalDigit { return d === 0 ? '\u0000' : d };
 
 CharacterClassEscape
-  = [dDsSwW]
+  = [dDsSwW] { return characterClassEscape(); }
 
 CharacterClass
   = '[^' ClassRanges ']'
@@ -87,7 +85,7 @@ CharacterClass
 
 ClassRanges
   = NonemptyClassRanges
-  / /*empty*/
+  / ''
 
 NonemptyClassRanges
   = ClassAtom '-' ClassAtom ClassRanges
@@ -147,7 +145,7 @@ DecimalIntegerLiteral
   / d:$(NonZeroDigit DecimalDigits?) { return parseInt(d, 10); }
 
 DecimalDigits
-  = d:$(DecimalDigit DecimalDigits?) { return parseInt(d, 10); }
+  = d:$(DecimalDigit+) { return parseInt(d, 10); }
 
 DecimalDigit
   = [0-9]
