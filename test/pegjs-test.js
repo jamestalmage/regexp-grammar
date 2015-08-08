@@ -1,5 +1,5 @@
 'use strict';
-describe('blah', function() {
+describe('pegjs', function() {
   var PEG = require('pegjs');
   var assert = require('assert');
 
@@ -97,7 +97,7 @@ describe('blah', function() {
     );
   });
 
-  it ('LineTerminatorSequence', function() {
+  it('LineTerminatorSequence', function() {
     var gtltChars = PEG.buildParser([
       'LineTerminatorSequence',
         "= '\\u000A'",
@@ -114,5 +114,7 @@ describe('blah', function() {
       '\u2029'
     );
   });
+
+
 
 });
