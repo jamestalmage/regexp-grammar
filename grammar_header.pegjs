@@ -53,7 +53,7 @@ AtomEscape
 
 CharacterEscape
   = ControlEscape
-  / 'c' ControlLetter { return c; }
+  / 'c' c:ControlLetter { return c; }
   / HexEscapeSequence
   / UnicodeEscapeSequence
   / IdentityEscape
@@ -66,10 +66,10 @@ ControlEscape
   / 'v' { return '\v'; }
 
 ControlLetter
-  = a:[a-zA-Z] { return fromCodePoint(a.toLowerCase().charCodeAt(0) - 96); }
+  = a:[a-zA-Z] { return fromCodePoint(a.charCodeAt(0) % 32); }
 
 IdentityEscape
-  = !IdentifierPart .
+  = !IdentifierPart c:. { return c; }
   / ZWJ
   / ZWNJ
 
@@ -77,7 +77,7 @@ DecimalEscape
   = d:DecimalIntegerLiteral !DecimalDigit { return d === 0 ? '\u0000' : d };
 
 CharacterClassEscape
-  = [dDsSwW] { return characterClassEscape(); }
+  = c:[dDsSwW] { return characterClassEscape(c); }
 
 CharacterClass
   = '[^' ClassRanges ']'
@@ -106,9 +106,14 @@ ClassAtomNoDash
   / [^\\\]\-]
 
 ClassEscape
-  = DecimalEscape
-  / 'b'
-  / CharacterEscape
+  = d:DecimalEscape {
+      if (typeof d !== 'string') {
+        expected('"0" (or something else that escapes to a character)');
+      }
+      return factory.charSet([d], false);
+    }
+  / 'b' { return factory.charSet(['\u0008'], false); }
+  / c:CharacterEscape { return factory.charSet([c], false); }
   / CharacterClassEscape
 
 IdentifierStart
