@@ -4,7 +4,7 @@ describe('grammar', function() {
   var assert = require('assert');
   var makeGrammar = require('../make-grammar');
   var makeParser = require('../make-parser');
-  var parser = makeParser(makeGrammar.sync(), {
+  var parser = makeParser(makeGrammar(), {
     allRules: true,
     fakeFactory: true
   });

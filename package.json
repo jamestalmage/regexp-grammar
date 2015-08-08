@@ -36,7 +36,7 @@
     "jscs": "^1.13.1",
     "jshint": "^2.8.0",
     "mocha": "^2.2.5",
-    "pegjs": "git@github.com:pegjs/pegjs.git",
+    "pegjs": "^0.8.0",
     "regenerate": "^1.2.1",
     "sinon": "^1.15.4",
     "unicode-3.0.1": "^0.1.5"

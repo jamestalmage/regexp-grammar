@@ -11,9 +11,9 @@ var WhiteSpace = [
 
 var LineTerminator = [
   '\u000A',
-  '\u000D'
-  //'\u2028',
-  //'\u2029'
+  '\u000D',
+  '\u2028',
+  '\u2029'
 ];
 
 var i;
@@ -42,8 +42,14 @@ function unique(arr) {
   });
 }
 
-module.exports = {
+var output = JSON.stringify({
   s: unique(WhiteSpace.concat(LineTerminator)),
   d: d,
   w: w
-};
+}, null, 2);
+
+
+output = output.replace('\u2028', '\\u2028');
+output = output.replace('\u2029', '\\u2029');
+
+module.exports = output;

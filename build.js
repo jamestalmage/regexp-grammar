@@ -8,7 +8,7 @@ var parserPath = path.resolve(__dirname, 'parser.js');
 var debugParserPath = path.resolve(__dirname, 'parser.debug.js');
 var smallParserPath = path.resolve(__dirname, 'parser.small.js');
 
-var grammarSource = makeGrammar.sync();
+var grammarSource = makeGrammar();
 fs.writeFileSync(grammarPath, grammarSource);
 
 function output(path, options) {
