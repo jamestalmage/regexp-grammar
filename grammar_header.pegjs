@@ -47,9 +47,14 @@ PatternCharacter
   = c:[^^$\\.*+?()[\]{}|] { return factory.patternCharacter(c); }
 
 AtomEscape
-  = DecimalEscape
-  / CharacterEscape
-  / CharacterClassEscape
+  = d:DecimalEscape {
+    if (typeof d === 'string') {
+      return charSetMatcher(charSet1(d), false);
+    }
+    return backReferenceMatcher(d);
+  }
+  / d:CharacterEscape { return charSetMatcher(charSet1(d), false); }
+  / d:CharacterClassEscape { return charSetMatcher(d, false); }
 
 CharacterEscape
   = ControlEscape

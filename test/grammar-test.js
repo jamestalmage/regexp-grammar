@@ -58,18 +58,59 @@ describe('grammar', function() {
     }
   }
 
+  function charSetMatcher(charSet, invert) {
+    return {
+      type: 'CharSetMatcher',
+      charSet: charSet,
+      invert: invert
+    };
+  }
+
+  function backReferenceMatcher(reference) {
+    return {
+      type: 'BackReferenceMatcher',
+      reference: reference
+    };
+  }
+
   var options = {factory: {
     charSet: charSet,
     characterRange: characterRange,
     invertCharSet: invertCharSet,
     characterClass: characterClass,
-    charSetUnion: charSetUnion
+    charSetUnion: charSetUnion,
+    charSetMatcher: charSetMatcher,
+    backReferenceMatcher: backReferenceMatcher
   }};
 
   var spy;
 
   beforeEach(function() {
     spy = sinon.spy();
+  });
+
+  it('AtomEscape', function() {
+    assert.deepEqual(
+      parser.AtomEscape('1', options),
+      backReferenceMatcher(1)
+    );
+
+    assert.deepEqual(
+      parser.AtomEscape('0', options),
+      charSetMatcher(charSet(['\u0000']), false)
+    );
+
+    assert.deepEqual(
+      parser.AtomEscape('f', options),
+      charSetMatcher(charSet(['\f']), false)
+    );
+
+    assert.deepEqual(
+      parser.AtomEscape('d', options),
+      charSetMatcher(charSet(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']), false)
+    );
+
+
   });
 
   it('CharacterClass', function() {

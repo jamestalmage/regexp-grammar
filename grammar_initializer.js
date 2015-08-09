@@ -60,3 +60,11 @@ function charSetUnion(a, b) {
   }
   return factory.charSetUnion(a, b);
 }
+
+function backReferenceMatcher(reference) {
+  return factory.backReferenceMatcher(reference);
+}
+
+function charSetMatcher(charSet, invert) {
+  return factory.charSetMatcher(charSet, invert);
+}
