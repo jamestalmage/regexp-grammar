@@ -45,11 +45,12 @@ function unique(arr) {
 var output = JSON.stringify({
   s: unique(WhiteSpace.concat(LineTerminator)),
   d: d,
-  w: w
+  w: w,
+  lineTerminator: LineTerminator
 }, null, 2);
 
 
-output = output.replace('\u2028', '\\u2028');
-output = output.replace('\u2029', '\\u2029');
+output = output.replace(/\u2028/g, '\\u2028');
+output = output.replace(/\u2029/g, '\\u2029');
 
 module.exports = output;

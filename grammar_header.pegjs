@@ -24,27 +24,27 @@ Assertion
   / '(?!' disjunction:Disjunction ')' { return factory.lookAheadAssertion(disjunction, true); }
 
 Quantifier
-  = range:QuantifierPrefix '?' { return {range: range, greedy: false}; }
-  / range:QuantifierPrefix { return {range: range, greedy: true}; }
+  = q:QuantifierPrefix '?' { q.push(false); return q; }
+  / q:QuantifierPrefix { q.push(true); return q; }
 
 QuantifierPrefix
-  = '*' { return [0, null]; }
-  / '+' { return [1, null]; }
+  = '*' { return [0, Number.POSITIVE_INFINITY]; }
+  / '+' { return [1, Number.POSITIVE_INFINITY]; }
   / '?' { return [0, 1]; }
   / '{' n:DecimalDigits ',' m:DecimalDigits '}' { return [n, m]; }
-  / '{' n:DecimalDigits ',}' { return [n, null]; }
+  / '{' n:DecimalDigits ',}' { return [n, Number.POSITIVE_INFINITY]; }
   / '{' n:DecimalDigits '}' { return [n, n]; }
 
 Atom
-  = PatternCharacter
-  / '.' { return factory.any(); }
-  / '\\' e: AtomEscape { return e; }
-  / CharacterClass
-  / '(' d:Disjunction ')' { return factory.group(d, true); }
-  / '(?:' d:Disjunction ')' { return factory.group(d, false); }
+  = c:PatternCharacter { return charSetMatcher(charSet1(c), false); }
+  / '.' { return charSetMatcher(characterClassEscape('.'), false); }
+  / '\\' m:AtomEscape { return m; }
+  / c:CharacterClass { return charSetMatcher(c[0], c[1]); }
+  / '(' d:Disjunction ')' { return group(d, true); }
+  / '(?:' d:Disjunction ')' { return group(d, false); }
 
 PatternCharacter
-  = c:[^^$\\.*+?()[\]{}|] { return factory.patternCharacter(c); }
+  = [^^$\\.*+?()[\]{}|]
 
 AtomEscape
   = d:DecimalEscape {
@@ -85,8 +85,8 @@ CharacterClassEscape
   = c:[dDsSwW] { return characterClassEscape(c); }
 
 CharacterClass
-  = '[^' a:ClassRanges ']' { return characterClass(a, true); }
-  / '[' a:ClassRanges ']' { return characterClass(a, false); }
+  = '[^' a:ClassRanges ']' { return [a, true]; }
+  / '[' a:ClassRanges ']' { return [a, false]; }
 
 ClassRanges
   = NonemptyClassRanges

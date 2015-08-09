@@ -16,6 +16,9 @@ function codePointAt(str, at) {
 }
 
 function defaultCharacterClassEscape(c) {
+  if (c === '.') {
+    return invertCharSet(charSet(unicodeSymbolSets.lineTerminator.slice()))
+  }
   var invert = c === c.toUpperCase();
   c = c.toLowerCase();
   var set = charSet(unicodeSymbolSets[c].slice());
@@ -48,10 +51,6 @@ function charSet1(c) {
 
 function invertCharSet(c) {
   return factory.invertCharSet(c);
-}
-
-function characterClass(a, invert) {
-  return factory.characterClass(a, invert);
 }
 
 function charSetUnion(a, b) {
