@@ -88,13 +88,13 @@ ClassRanges
   / '' { return; }
 
 NonemptyClassRanges
-  = a:ClassAtom '-' b:ClassAtom c:ClassRanges { return charSet2(characterRange(a,b), c); }
-  / a:ClassAtom b:NonemptyClassRangesNoDash { return charSet2(a,b); }
+  = a:ClassAtom '-' b:ClassAtom c:ClassRanges { return charSetUnion(characterRange(a,b), c); }
+  / a:ClassAtom b:NonemptyClassRangesNoDash { return charSetUnion(a,b); }
   / ClassAtom
 
 NonemptyClassRangesNoDash
-  = a:ClassAtomNoDash '-' b:ClassAtom c:ClassRanges { return charSet2(characterRange(a,b), c); }
-  / a:ClassAtomNoDash b:NonemptyClassRangesNoDash { return charSet2(a,b); }
+  = a:ClassAtomNoDash '-' b:ClassAtom c:ClassRanges { return charSetUnion(characterRange(a,b), c); }
+  / a:ClassAtomNoDash b:NonemptyClassRangesNoDash { return charSetUnion(a,b); }
   / ClassAtom
 
 ClassAtom

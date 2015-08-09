@@ -46,17 +46,17 @@ function charSet1(c) {
   return charSet([c]);
 }
 
-function charSet2(a, b) {
-  if (b === undefined) {
-    return a;
-  }
-  return charSet([a, b]);
-}
-
 function invertCharSet(c) {
   return factory.invertCharSet(c);
 }
 
 function characterClass(a, invert) {
   return factory.characterClass(a, invert);
+}
+
+function charSetUnion(a, b) {
+  if (b === undefined) {
+    return a;
+  }
+  return factory.charSetUnion(a, b);
 }

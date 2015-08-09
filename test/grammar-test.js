@@ -18,6 +18,10 @@ describe('grammar', function() {
   }
 
   function validateRangeArg(min, name) {
+    if ('string' === typeof min) {
+      assert.equal(1, min.length);
+      return min;
+    }
     assert.equal(min.type, 'CharSet', name + '.type');
     assert.equal(min.members.length, 1, name + '.length');
     assert.equal(typeof min.members[0], 'string', name + '.type');
@@ -29,6 +33,14 @@ describe('grammar', function() {
       type: 'CharacterRange',
       min: validateRangeArg(min, 'min'),
       max: validateRangeArg(max, 'max')
+    };
+  }
+
+  function charSetUnion(a, b) {
+    return {
+      type: 'CharSetUnion',
+      a: a,
+      b: b
     };
   }
 
@@ -50,7 +62,8 @@ describe('grammar', function() {
     charSet: charSet,
     characterRange: characterRange,
     invertCharSet: invertCharSet,
-    characterClass: characterClass
+    characterClass: characterClass,
+    charSetUnion: charSetUnion
   }};
 
   var spy;
@@ -63,28 +76,28 @@ describe('grammar', function() {
     assert.deepEqual(
       parser.CharacterClass('[ab]', options),
       characterClass(
-        charSet([charSet(['a']), charSet(['b'])]), false
+        charSetUnion(charSet(['a']), charSet(['b'])), false
       )
     );
     assert.deepEqual(
       parser.CharacterClass('[ac-f]', options),
       characterClass(
-        charSet([charSet(['a']), characterRange(charSet(['c']), charSet(['f']))]), false
+        charSetUnion(charSet(['a']), characterRange('c', 'f')), false
       )
     );
     assert.deepEqual(
       parser.CharacterClass('[c-f]', options),
       characterClass(
-        characterRange(charSet(['c']), charSet(['f'])), false
+        characterRange('c', 'f'), false
       )
     );
     assert.deepEqual(
       parser.CharacterClass('[a-b-c]', options),
       characterClass(
-        charSet([
-          characterRange(charSet(['a']), charSet(['b'])),
-          charSet([charSet(['-']), charSet(['c'])])
-        ])
+        charSetUnion(
+          characterRange('a', 'b'),
+          charSetUnion(charSet(['-']), charSet(['c']))
+        )
         , false
       )
     );
@@ -93,7 +106,7 @@ describe('grammar', function() {
   it('NonemptyClassRangesNoDash', function() {
     assert.deepEqual(
       parser.NonemptyClassRangesNoDash('a-b', options),
-      characterRange(charSet(['a']), charSet(['b']))
+      characterRange('a','b')
     );
 
     assert.deepEqual(
