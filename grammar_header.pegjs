@@ -80,40 +80,40 @@ CharacterClassEscape
   = c:[dDsSwW] { return characterClassEscape(c); }
 
 CharacterClass
-  = '[^' ClassRanges ']'
-  / '[' ClassRanges ']'
+  = '[^' a:ClassRanges ']' { return characterClass(a, true); }
+  / '[' a:ClassRanges ']' { return characterClass(a, false); }
 
 ClassRanges
   = NonemptyClassRanges
-  / ''
+  / '' { return; }
 
 NonemptyClassRanges
-  = ClassAtom '-' ClassAtom ClassRanges
-  / ClassAtom NonemptyClassRangesNoDash
+  = a:ClassAtom '-' b:ClassAtom c:ClassRanges { return charSet2(characterRange(a,b), c); }
+  / a:ClassAtom b:NonemptyClassRangesNoDash { return charSet2(a,b); }
   / ClassAtom
 
 NonemptyClassRangesNoDash
-  = ClassAtom
-  / ClassAtomNoDash NonemptyClassRangesNoDash
-  / ClassAtomNoDash '-' ClassAtom ClassRanges
+  = a:ClassAtomNoDash '-' b:ClassAtom c:ClassRanges { return charSet2(characterRange(a,b), c); }
+  / a:ClassAtomNoDash b:NonemptyClassRangesNoDash { return charSet2(a,b); }
+  / ClassAtom
 
 ClassAtom
-  = '-'
+  = '-' { return charSet1('-'); }
   / ClassAtomNoDash
 
 ClassAtomNoDash
-  = '\\' ClassEscape
-  / [^\\\]\-]
+  = '\\' c:ClassEscape { return c; }
+  / c:[^\\\]\-] { return charSet1(c); }
 
 ClassEscape
   = d:DecimalEscape {
       if (typeof d !== 'string') {
         expected('"0" (or something else that escapes to a character)');
       }
-      return factory.charSet([d], false);
+      return charSet1(d);
     }
-  / 'b' { return factory.charSet(['\u0008'], false); }
-  / c:CharacterEscape { return factory.charSet([c], false); }
+  / 'b' { return charSet1('\u0008'); }
+  / c:CharacterEscape { return charSet1(c); }
   / CharacterClassEscape
 
 IdentifierStart

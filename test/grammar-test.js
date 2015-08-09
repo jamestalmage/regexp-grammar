@@ -9,32 +9,217 @@ describe('grammar', function() {
     fakeFactory: true
   });
 
+  function charSet(members) {
+    return {
+      type: 'CharSet',
+      members: members,
+      invert: false
+    };
+  }
+
+  function validateRangeArg(min, name) {
+    assert.equal(min.type, 'CharSet', name + '.type');
+    assert.equal(min.members.length, 1, name + '.length');
+    assert.equal(typeof min.members[0], 'string', name + '.type');
+    return min.members[0];
+  }
+
+  function characterRange(min, max) {
+    return {
+      type: 'CharacterRange',
+      min: validateRangeArg(min, 'min'),
+      max: validateRangeArg(max, 'max')
+    };
+  }
+
+  function invertCharSet(c) {
+    var c2 = charSet(c.members);
+    c2.invert = !c.invert;
+    return c2;
+  }
+
+  function characterClass(charSet, invert) {
+    return {
+      type: 'CharacterClass',
+      charSet: charSet,
+      invert: invert
+    }
+  }
+
+  var options = {factory: {
+    charSet: charSet,
+    characterRange: characterRange,
+    invertCharSet: invertCharSet,
+    characterClass: characterClass
+  }};
+
   var spy;
 
   beforeEach(function() {
     spy = sinon.spy();
   });
 
-  it('DecimalEscape', function() {
-    assert.strictEqual('\u0000', parser.DecimalEscape('0'));
-    assert.strictEqual(1, parser.DecimalEscape('1'));
-    assert.strictEqual(2, parser.DecimalEscape('2'));
-    assert.strictEqual(23, parser.DecimalEscape('23'));
+  it('CharacterClass', function() {
+    assert.deepEqual(
+      parser.CharacterClass('[ab]', options),
+      characterClass(
+        charSet([charSet(['a']), charSet(['b'])]), false
+      )
+    );
+    assert.deepEqual(
+      parser.CharacterClass('[ac-f]', options),
+      characterClass(
+        charSet([charSet(['a']), characterRange(charSet(['c']), charSet(['f']))]), false
+      )
+    );
+    assert.deepEqual(
+      parser.CharacterClass('[c-f]', options),
+      characterClass(
+        characterRange(charSet(['c']), charSet(['f'])), false
+      )
+    );
+    assert.deepEqual(
+      parser.CharacterClass('[a-b-c]', options),
+      characterClass(
+        charSet([
+          characterRange(charSet(['a']), charSet(['b'])),
+          charSet([charSet(['-']), charSet(['c'])])
+        ])
+        , false
+      )
+    );
+  });
+
+  it('NonemptyClassRangesNoDash', function() {
+    assert.deepEqual(
+      parser.NonemptyClassRangesNoDash('a-b', options),
+      characterRange(charSet(['a']), charSet(['b']))
+    );
+
+    assert.deepEqual(
+      parser.NonemptyClassRangesNoDash('-', options),
+      charSet(['-'])
+    );
+
+    assert.deepEqual(
+      parser.NonemptyClassRangesNoDash('a', options),
+      charSet(['a'])
+    );
+
+    assert.deepEqual(
+      parser.NonemptyClassRangesNoDash('b', options),
+      charSet(['b'])
+    );
+
+    assert.deepEqual(
+      parser.NonemptyClassRangesNoDash('0', options),
+      charSet(['0'])
+    );
+
+    assert.deepEqual(
+      parser.NonemptyClassRangesNoDash('\\0', options),
+      charSet(['\u0000'])
+    );
+
+    assert.deepEqual(
+      parser.NonemptyClassRangesNoDash('\\f', options),
+      charSet(['\f'])
+    );
+
+    assert.deepEqual(
+      parser.NonemptyClassRangesNoDash('\\d', options),
+      charSet(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'])
+    );
+
+    assert.deepEqual(
+      parser.NonemptyClassRangesNoDash('\\D', options),
+      invertCharSet(charSet(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']))
+    );
+  });
+
+  it('ClassAtom', function() {
+    assert.deepEqual(
+      parser.ClassAtom('-', options),
+      charSet(['-'])
+    );
+
+    assert.deepEqual(
+      parser.ClassAtom('a', options),
+      charSet(['a'])
+    );
+
+    assert.deepEqual(
+      parser.ClassAtom('b', options),
+      charSet(['b'])
+    );
+
+    assert.deepEqual(
+      parser.ClassAtom('0', options),
+      charSet(['0'])
+    );
+
+    assert.deepEqual(
+      parser.ClassAtom('\\0', options),
+      charSet(['\u0000'])
+    );
+
+    assert.deepEqual(
+      parser.ClassAtom('\\f', options),
+      charSet(['\f'])
+    );
+
+    assert.deepEqual(
+      parser.ClassAtom('\\d', options),
+      charSet(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'])
+    );
+
+    assert.deepEqual(
+      parser.ClassAtom('\\D', options),
+      invertCharSet(charSet(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']))
+    );
+  });
+
+  it('ClassAtomNoDash', function() {
+    assert.deepEqual(
+      parser.ClassAtomNoDash('a', options),
+      charSet(['a'])
+    );
+
+    assert.deepEqual(
+      parser.ClassAtomNoDash('b', options),
+      charSet(['b'])
+    );
+
+    assert.deepEqual(
+      parser.ClassAtomNoDash('0', options),
+      charSet(['0'])
+    );
+
+    assert.deepEqual(
+      parser.ClassAtomNoDash('\\0', options),
+      charSet(['\u0000'])
+    );
+
+    assert.deepEqual(
+      parser.ClassAtomNoDash('\\f', options),
+      charSet(['\f'])
+    );
+
+    assert.deepEqual(
+      parser.ClassAtomNoDash('\\d', options),
+      charSet(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'])
+    );
+
+    assert.deepEqual(
+      parser.ClassAtomNoDash('\\D', options),
+      invertCharSet(charSet(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']))
+    );
   });
 
   it('ClassEscape', function() {
-    function charSet(members, invert) {
-      return {
-        type: 'CharSet',
-        members: members,
-        invert: invert
-      };
-    }
-    var options = {factory: {charSet: charSet}};
-
     assert.deepEqual(
       parser.ClassEscape('0', options),
-      charSet(['\u0000'], false)
+      charSet(['\u0000'])
     );
 
     assert.throws(function(){
@@ -43,32 +228,36 @@ describe('grammar', function() {
 
     assert.deepEqual(
       parser.ClassEscape('b', options),
-      charSet(['\u0008'], false)
+      charSet(['\u0008'])
     );
+
+    assert.throws(function(){
+      parser.ClassEscape('B', options);
+    });
 
     assert.deepEqual(
       parser.ClassEscape('f', options),
-      charSet(['\f'], false)
+      charSet(['\f'])
     );
 
     assert.deepEqual(
       parser.ClassEscape('cm', options),
-      charSet(['\r'], false)
+      charSet(['\r'])
     );
 
     assert.deepEqual(
       parser.ClassEscape('cJ', options),
-      charSet(['\n'], false)
+      charSet(['\n'])
     );
 
     assert.deepEqual(
       parser.ClassEscape('d', options),
-      charSet(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'], false)
+      charSet(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'])
     );
 
     assert.deepEqual(
       parser.ClassEscape('D', options),
-      charSet(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'], true)
+      invertCharSet(charSet(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']))
     );
   });
 
@@ -117,6 +306,13 @@ describe('grammar', function() {
     assert.strictEqual('&', parser.IdentityEscape('&'));
     assert.strictEqual('"', parser.IdentityEscape('"'));
     assert.strictEqual("'", parser.IdentityEscape("'"));
+  });
+
+  it('DecimalEscape', function() {
+    assert.strictEqual('\u0000', parser.DecimalEscape('0'));
+    assert.strictEqual(1, parser.DecimalEscape('1'));
+    assert.strictEqual(2, parser.DecimalEscape('2'));
+    assert.strictEqual(23, parser.DecimalEscape('23'));
   });
 
   describe('CharacterEscape', function() {
