@@ -2,13 +2,12 @@ Pattern
   = Disjunction
 
 Disjunction
-  = left: Alternative '|' right: Disjunction { return factory.disjunction(left, right); }
+  = l: Alternative '|' r: Disjunction { return disjunctionMatcher(l, r); }
   / Alternative
 
 Alternative
-  = term:Term alternative:Alternative { return factory.alternative(term, alternative); }
-  / term:Term { return factory.alternative(term, null); }
-  / '' { return factory.alternative(null, null); }
+  = t:Term a:Alternative { return alternativeMatcher(t, a); }
+  / '' { return emptyMatcher(); }
 
 Term
   = a:Assertion { return assertionMatcher(a); }
@@ -162,18 +161,3 @@ DecimalDigit
 
 NonZeroDigit
   = [1-9]
-
-/*
--LineTerminator
-  = '\u000A'
-  / '\u000D'
-  / '\u2028'
-  / '\u2028'
-
--LineTerminatorSequence
-  = '\u000A'
-  / '\u000D\u000A'
-  / '\u000D'
-  / '\u2028'
-  / '\u2029'
-*/

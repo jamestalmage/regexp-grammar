@@ -66,28 +66,48 @@ describe('grammar', function() {
   }
 
   function lineStartAssertion() {
-    return {type: 'lineStartAssertion'};
+    return {type: 'LineStartAssertion'};
   }
 
   function lineEndAssertion() {
-    return {type: 'lineEndAssertion'};
+    return {type: 'LineEndAssertion'};
   }
 
   function wordBoundaryAssertion(invert) {
-    return {type: 'wordBoundaryAssertion', invert:invert};
+    return {type: 'WordBoundaryAssertion', invert:invert};
   }
 
   function assertionMatcher(assertion) {
-    return {type: 'assertionMatcher', assertion: assertion};
+    return {type: 'AssertionMatcher', assertion: assertion};
   }
 
   function repeatMatcher(matcher, min, max, greedy) {
     return {
-      type: 'repeatMatcher',
+      type: 'RepeatMatcher',
       matcher: matcher,
       min: min,
       max: max,
       greedy: greedy
+    }
+  }
+
+  function alternativeMatcher(term, alternative) {
+    return {
+      type: 'AlternativeMatcher',
+      term: term,
+      alternative: alternative
+    }
+  }
+
+  function emptyMatcher() {
+    return {type: 'EmptyMatcher'}
+  }
+
+  function disjunctionMatcher(l, r) {
+    return {
+      type: 'DisjunctionMatcher',
+      left: l,
+      right: r
     }
   }
 
@@ -103,13 +123,73 @@ describe('grammar', function() {
     lineEndAssertion: lineEndAssertion,
     wordBoundaryAssertion: wordBoundaryAssertion,
     assertionMatcher: assertionMatcher,
-    repeatMatcher: repeatMatcher
+    repeatMatcher: repeatMatcher,
+    alternativeMatcher: alternativeMatcher,
+    emptyMatcher: emptyMatcher,
+    disjunctionMatcher: disjunctionMatcher
   }};
 
   var spy;
 
   beforeEach(function() {
     spy = sinon.spy();
+  });
+
+  it('Disjunction', function() {
+    assert.deepEqual(
+      parser.Disjunction('a|b', options),
+      disjunctionMatcher(
+        alternativeMatcher(
+          charSetMatcher(charSet(['a']), false),
+          emptyMatcher()
+        ),
+        alternativeMatcher(
+          charSetMatcher(charSet(['b']), false),
+          emptyMatcher()
+        )
+      )
+    );
+
+    assert.deepEqual(
+      parser.Disjunction('ab|cd', options),
+      disjunctionMatcher(
+        alternativeMatcher(
+          charSetMatcher(charSet(['a']), false),
+          alternativeMatcher(
+            charSetMatcher(charSet(['b']), false),
+            emptyMatcher()
+          )
+        ),
+        alternativeMatcher(
+          charSetMatcher(charSet(['c']), false),
+          alternativeMatcher(
+            charSetMatcher(charSet(['d']), false),
+            emptyMatcher()
+          )
+        )
+      )
+    );
+  });
+
+  it('Alternative', function() {
+    assert.deepEqual(
+      parser.Alternative('a', options),
+      alternativeMatcher(
+        charSetMatcher(charSet(['a']), false),
+        emptyMatcher()
+      )
+    );
+
+    assert.deepEqual(
+      parser.Alternative('ab', options),
+      alternativeMatcher(
+        charSetMatcher(charSet(['a']), false),
+        alternativeMatcher(
+          charSetMatcher(charSet(['b']), false),
+          emptyMatcher()
+        )
+      )
+    );
   });
 
   it('Term', function() {

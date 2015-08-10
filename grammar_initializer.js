@@ -2,18 +2,17 @@ var factory = options.factory;
 if (!factory) {
   throw new Error('no factory specified');
 }
-var flags = options.flags || {};
 var fromCodePoint = String.fromCodePoint || options.fromCodePoint;
 var characterClassEscape = factory.characterClassEscape || defaultCharacterClassEscape;
 
-function codePointAt(str, at) {
+/*function codePointAt(str, at) {
   at = at || 0;
   if (!str) error('codePointAt: str cannot be undefined');
   if (str.codePointAt) {
     return str.codePointAt(at);
   }
   return options.codePointAt(str, at);
-}
+} */
 
 function defaultCharacterClassEscape(c) {
   if (c === '.') {
@@ -32,13 +31,13 @@ function characterRange(min, max) {
   if (factory.characterRange) {
     return factory.characterRange(min, max);
   }
-  var members = [];
+  /*var members = [];
   min = codePointAt(min);
   max = codePointAt(max);
   for (var i = min; i <= max; i++) {
     members.push(fromCodePoint(i));
   }
-  return charSet(members, false);
+  return charSet(members, false); */
 }
 
 function charSet(members) {
@@ -90,4 +89,16 @@ function assertionMatcher(assertion) {
 
 function repeatMatcher(matcher, min, max, greedy) {
   return factory.repeatMatcher(matcher, min, max, greedy);
+}
+
+function alternativeMatcher(t, a) {
+  return factory.alternativeMatcher(t, a);
+}
+
+function disjunctionMatcher(t, a) {
+  return factory.disjunctionMatcher(t, a);
+}
+
+function emptyMatcher() {
+  return factory.emptyMatcher();
 }
