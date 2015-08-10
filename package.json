@@ -28,7 +28,9 @@
     "regexp",
     "parser"
   ],
-  "dependencies": {},
+  "dependencies": {
+    "ast-types": "^0.8.8"
+  },
   "devDependencies": {
     "codeclimate-test-reporter": "^0.1.0",
     "coveralls": "^2.11.2",

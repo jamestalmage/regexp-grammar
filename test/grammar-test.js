@@ -9,132 +9,32 @@ describe('grammar', function() {
     fakeFactory: true
   });
 
-  function charSet(members) {
-    return {
-      type: 'CharSet',
-      members: members,
-      invert: false
-    };
-  }
-
-  function validateRangeArg(min, name) {
+  var b = require('../types').builders;
+  var charSet = b.charSet.bind(b);
+  var characterRange = function(min, max) {
     if ('string' === typeof min) {
-      assert.equal(1, min.length);
-      return min;
+      min = charSet([min]);
     }
-    assert.equal(min.type, 'CharSet', name + '.type');
-    assert.equal(min.members.length, 1, name + '.length');
-    assert.equal(typeof min.members[0], 'string', name + '.type');
-    return min.members[0];
-  }
-
-  function characterRange(min, max) {
-    return {
-      type: 'CharacterRange',
-      min: validateRangeArg(min, 'min'),
-      max: validateRangeArg(max, 'max')
-    };
-  }
-
-  function charSetUnion(a, b) {
-    return {
-      type: 'CharSetUnion',
-      a: a,
-      b: b
-    };
-  }
-
-  function invertCharSet(c) {
-    var c2 = charSet(c.members);
-    c2.invert = !c.invert;
-    return c2;
-  }
-
-  function charSetMatcher(charSet, invert) {
-    return {
-      type: 'CharSetMatcher',
-      charSet: charSet,
-      invert: invert
-    };
-  }
-
-  function backReferenceMatcher(reference) {
-    return {
-      type: 'BackReferenceMatcher',
-      reference: reference
-    };
-  }
-
-  function lineStartAssertion() {
-    return {type: 'LineStartAssertion'};
-  }
-
-  function lineEndAssertion() {
-    return {type: 'LineEndAssertion'};
-  }
-
-  function wordBoundaryAssertion(invert) {
-    return {type: 'WordBoundaryAssertion', invert:invert};
-  }
-
-  function assertionMatcher(assertion) {
-    return {type: 'AssertionMatcher', assertion: assertion};
-  }
-
-  function repeatMatcher(matcher, min, max, greedy) {
-    return {
-      type: 'RepeatMatcher',
-      matcher: matcher,
-      min: min,
-      max: max,
-      greedy: greedy
+    if ('string' === typeof max) {
+      max = charSet([max]);
     }
-  }
+    return b.characterRange(min, max);
+  };
+  var invertCharSet = b.invertCharSet.bind(b);
+  var charSetUnion = b.charSetUnion.bind(b);
+  var charSetMatcher = b.charSetMatcher.bind(b);
+  var backReferenceMatcher = b.backReferenceMatcher.bind(b);
+  var lineStartAssertion = b.lineStartAssertion.bind(b);
+  var lineEndAssertion = b.lineEndAssertion.bind(b);
+  var wordBoundaryAssertion = b.wordBoundaryAssertion.bind(b);
+  var assertionMatcher = b.assertionMatcher.bind(b);
+  var repeatMatcher = b.repeatMatcher.bind(b);
+  var alternativeMatcher = b.alternativeMatcher.bind(b);
+  var emptyMatcher = b.emptyMatcher.bind(b);
+  var disjunctionMatcher = b.disjunctionMatcher.bind(b);
+  var groupMatcher = b.groupMatcher.bind(b); /*  */
 
-  function alternativeMatcher(term, alternative) {
-    return {
-      type: 'AlternativeMatcher',
-      term: term,
-      alternative: alternative
-    }
-  }
-
-  function emptyMatcher() {
-    return {type: 'EmptyMatcher'}
-  }
-
-  function disjunctionMatcher(l, r) {
-    return {
-      type: 'DisjunctionMatcher',
-      left: l,
-      right: r
-    }
-  }
-
-  function groupMatcher(matcher) {
-    return {
-      type: 'GroupMatcher',
-      matcher: matcher
-    }
-  }
-
-  var options = {factory: {
-    charSet: charSet,
-    characterRange: characterRange,
-    invertCharSet: invertCharSet,
-    charSetUnion: charSetUnion,
-    charSetMatcher: charSetMatcher,
-    backReferenceMatcher: backReferenceMatcher,
-    lineStartAssertion: lineStartAssertion,
-    lineEndAssertion: lineEndAssertion,
-    wordBoundaryAssertion: wordBoundaryAssertion,
-    assertionMatcher: assertionMatcher,
-    repeatMatcher: repeatMatcher,
-    alternativeMatcher: alternativeMatcher,
-    emptyMatcher: emptyMatcher,
-    disjunctionMatcher: disjunctionMatcher,
-    groupMatcher: groupMatcher
-  }};
+  var options = {factory: b};
 
   var spy;
 
