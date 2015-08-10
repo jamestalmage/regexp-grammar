@@ -65,19 +65,98 @@ describe('grammar', function() {
     };
   }
 
+  function lineStartAssertion() {
+    return {type: 'lineStartAssertion'};
+  }
+
+  function lineEndAssertion() {
+    return {type: 'lineEndAssertion'};
+  }
+
+  function wordBoundaryAssertion(invert) {
+    return {type: 'wordBoundaryAssertion', invert:invert};
+  }
+
+  function assertionMatcher(assertion) {
+    return {type: 'assertionMatcher', assertion: assertion};
+  }
+
+  function repeatMatcher(matcher, min, max, greedy) {
+    return {
+      type: 'repeatMatcher',
+      matcher: matcher,
+      min: min,
+      max: max,
+      greedy: greedy
+    }
+  }
+
+
   var options = {factory: {
     charSet: charSet,
     characterRange: characterRange,
     invertCharSet: invertCharSet,
     charSetUnion: charSetUnion,
     charSetMatcher: charSetMatcher,
-    backReferenceMatcher: backReferenceMatcher
+    backReferenceMatcher: backReferenceMatcher,
+    lineStartAssertion: lineStartAssertion,
+    lineEndAssertion: lineEndAssertion,
+    wordBoundaryAssertion: wordBoundaryAssertion,
+    assertionMatcher: assertionMatcher,
+    repeatMatcher: repeatMatcher
   }};
 
   var spy;
 
   beforeEach(function() {
     spy = sinon.spy();
+  });
+
+  it('Term', function() {
+    assert.deepEqual(
+      parser.Term('^', options),
+      assertionMatcher(lineStartAssertion())
+    );
+
+    assert.deepEqual(
+      parser.Term('a+', options),
+      repeatMatcher(
+        charSetMatcher(charSet(['a']), false),
+        1, Number.POSITIVE_INFINITY, true
+      )
+    );
+
+    assert.deepEqual(
+      parser.Term('a{3,5}?', options),
+      repeatMatcher(
+        charSetMatcher(charSet(['a']), false),
+        3, 5, false
+      )
+    );
+  });
+
+  it('Assertion', function() {
+    assert.deepEqual(
+      parser.Assertion('^', options),
+      lineStartAssertion()
+    );
+
+    assert.deepEqual(
+      parser.Assertion('$', options),
+      lineEndAssertion()
+    );
+
+    assert.deepEqual(
+      parser.Assertion('\\b', options),
+      wordBoundaryAssertion(false)
+    );
+
+    assert.deepEqual(
+      parser.Assertion('\\B', options),
+      wordBoundaryAssertion(true)
+    );
+
+    //TODO: lookAhead versions
   });
 
   it('Quantifier', function() {
@@ -164,6 +243,8 @@ describe('grammar', function() {
       parser.Atom('\\d', options),
       charSetMatcher(charSet(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']), false)
     );
+
+    //TODO: Group (with capturing and without)
   });
 
   it('AtomEscape', function() {

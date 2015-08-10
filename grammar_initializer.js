@@ -67,3 +67,27 @@ function backReferenceMatcher(reference) {
 function charSetMatcher(charSet, invert) {
   return factory.charSetMatcher(charSet, invert);
 }
+
+function lineStartAssertion() {
+  return factory.lineStartAssertion();
+}
+
+function lineEndAssertion() {
+  return factory.lineEndAssertion();
+}
+
+function wordBoundaryAssertion(invert) {
+  return factory.wordBoundaryAssertion(invert);
+}
+
+function lookAheadAssertion(disjunction, invert) {
+  return factory.lookAheadAssertion(disjunction, invert);
+}
+
+function assertionMatcher(assertion) {
+  return factory.assertionMatcher(assertion);
+}
+
+function repeatMatcher(matcher, min, max, greedy) {
+  return factory.repeatMatcher(matcher, min, max, greedy);
+}

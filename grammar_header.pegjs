@@ -11,17 +11,17 @@ Alternative
   / '' { return factory.alternative(null, null); }
 
 Term
-  = Assertion
-  / Atom Quantifier
+  = a:Assertion { return assertionMatcher(a); }
+  / m:Atom q:Quantifier { return repeatMatcher(m, q[0], q[1], q[2]); }
   / Atom
 
 Assertion
-  = '^' { return factory.lineStartAssertion(!!flags.multiline); }
-  / '$' { return factory.lineEndAssertion(!!flags.multiline); }
-  / '\\b' { return factory.wordBoundaryAssertion(false); }
-  / '\\B' { return factory.wordBoundaryAssertion(true); }
-  / '(?=' disjunction:Disjunction ')' { return factory.lookAheadAssertion(disjunction, false); }
-  / '(?!' disjunction:Disjunction ')' { return factory.lookAheadAssertion(disjunction, true); }
+  = '^' { return lineStartAssertion(); }
+  / '$' { return lineEndAssertion(); }
+  / '\\b' { return wordBoundaryAssertion(false); }
+  / '\\B' { return wordBoundaryAssertion(true); }
+  / '(?=' d:Disjunction ')' { return lookAheadAssertion(d, false); }
+  / '(?!' d:Disjunction ')' { return lookAheadAssertion(d, true); }
 
 Quantifier
   = q:QuantifierPrefix '?' { q.push(false); return q; }
@@ -40,8 +40,8 @@ Atom
   / '.' { return charSetMatcher(characterClassEscape('.'), false); }
   / '\\' m:AtomEscape { return m; }
   / c:CharacterClass { return charSetMatcher(c[0], c[1]); }
-  / '(' d:Disjunction ')' { return group(d, true); }
-  / '(?:' d:Disjunction ')' { return group(d, false); }
+  / '(' d:Disjunction ')' { return groupMatcher(d, true); }
+  / '(?:' d:Disjunction ')' { return groupMatcher(d, false); }
 
 PatternCharacter
   = [^^$\\.*+?()[\]{}|]

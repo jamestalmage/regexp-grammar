@@ -114,4 +114,69 @@ describe('pegjs', function() {
       '\u2029'
     );
   });
+
+  it('line term', function() {
+    var log = [];
+    function logger(message) {
+      log.push(message);
+    }
+
+    var opts = {log: logger};
+
+    var parser = PEG.buildParser( [
+      '{ var log = options.log }',
+      'start = &{ log("start"); return true; } "a" (& . start)? {log("match");} / &{ log("fail"); return false; } / .'
+      ].join('\n')
+    );
+
+    parser.parse('a', opts);
+
+    assert.deepEqual(log, ["start", "match"]);
+
+    log = [];
+
+    parser.parse('b', opts);
+
+    assert.deepEqual(log, ["start", "fail"]);
+
+    log = [];
+    parser.parse('aa', opts);
+
+    assert.deepEqual(log, ['start', 'start', 'match', 'match']);
+
+    log = [];
+    parser.parse('ab', opts);
+
+    assert.deepEqual(log, ['start', 'start', 'fail', 'match']);
+  });
+
+  it('multiple vars', function() {
+    var parser = PEG.buildParser(
+      'start = "a" c:("b" / "c") {return c; }'
+    );
+
+    assert.strictEqual(
+      parser.parse("ab"),
+      "b"
+    );
+
+    assert.strictEqual(
+      parser.parse("ac"),
+      "c"
+    );
+
+    parser = PEG.buildParser(
+      'start = "a" c:("b" { return "foo"; } / "c" { return "bar"; }) {return c; }'
+    );
+
+    assert.strictEqual(
+      parser.parse("ab"),
+      "foo"
+    );
+
+    assert.strictEqual(
+      parser.parse("ac"),
+      "bar"
+    );
+  });
 });
