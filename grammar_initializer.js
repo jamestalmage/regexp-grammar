@@ -28,16 +28,7 @@ function defaultCharacterClassEscape(c) {
 }
 
 function characterRange(min, max) {
-  if (factory.characterRange) {
-    return factory.characterRange(min, max);
-  }
-  /*var members = [];
-  min = codePointAt(min);
-  max = codePointAt(max);
-  for (var i = min; i <= max; i++) {
-    members.push(fromCodePoint(i));
-  }
-  return charSet(members, false); */
+  return factory.characterRange(min, max);
 }
 
 function charSet(members) {
@@ -101,4 +92,8 @@ function disjunctionMatcher(t, a) {
 
 function emptyMatcher() {
   return factory.emptyMatcher();
+}
+
+function groupMatcher(matcher) {
+  return factory.groupMatcher(matcher);
 }

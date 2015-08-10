@@ -39,8 +39,8 @@ Atom
   / '.' { return charSetMatcher(characterClassEscape('.'), false); }
   / '\\' m:AtomEscape { return m; }
   / c:CharacterClass { return charSetMatcher(c[0], c[1]); }
-  / '(' d:Disjunction ')' { return groupMatcher(d, true); }
-  / '(?:' d:Disjunction ')' { return groupMatcher(d, false); }
+  / '(' d:Disjunction ')' { return groupMatcher(d); }
+  / '(?:' d:Disjunction ')' { return d; }
 
 PatternCharacter
   = [^^$\\.*+?()[\]{}|]

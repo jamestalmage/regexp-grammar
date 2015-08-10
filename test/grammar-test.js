@@ -111,6 +111,12 @@ describe('grammar', function() {
     }
   }
 
+  function groupMatcher(matcher) {
+    return {
+      type: 'GroupMatcher',
+      matcher: matcher
+    }
+  }
 
   var options = {factory: {
     charSet: charSet,
@@ -126,13 +132,58 @@ describe('grammar', function() {
     repeatMatcher: repeatMatcher,
     alternativeMatcher: alternativeMatcher,
     emptyMatcher: emptyMatcher,
-    disjunctionMatcher: disjunctionMatcher
+    disjunctionMatcher: disjunctionMatcher,
+    groupMatcher: groupMatcher
   }};
 
   var spy;
 
   beforeEach(function() {
     spy = sinon.spy();
+  });
+
+  it('groups', function() {
+    assert.deepEqual(
+      parser.Pattern('(a|b)+\\1', options),
+      alternativeMatcher(
+        repeatMatcher(groupMatcher(
+          disjunctionMatcher(
+            alternativeMatcher(
+              charSetMatcher(charSet(['a']), false),
+              emptyMatcher()
+            ),
+            alternativeMatcher(
+              charSetMatcher(charSet(['b']), false),
+              emptyMatcher()
+            )
+          )
+        ), 1, Number.POSITIVE_INFINITY, true),
+        alternativeMatcher(
+          backReferenceMatcher(1),
+          emptyMatcher()
+        )
+      )
+    );
+
+    //does not create a group if it's not capturing
+    assert.deepEqual(
+      parser.Pattern('(?:a|b)+', options),
+      alternativeMatcher(
+        repeatMatcher(
+          disjunctionMatcher(
+            alternativeMatcher(
+              charSetMatcher(charSet(['a']), false),
+              emptyMatcher()
+            ),
+            alternativeMatcher(
+              charSetMatcher(charSet(['b']), false),
+              emptyMatcher()
+            )
+          )
+        , 1, Number.POSITIVE_INFINITY, true),
+          emptyMatcher()
+      )
+    );
   });
 
   it('Disjunction', function() {
@@ -323,8 +374,6 @@ describe('grammar', function() {
       parser.Atom('\\d', options),
       charSetMatcher(charSet(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']), false)
     );
-
-    //TODO: Group (with capturing and without)
   });
 
   it('AtomEscape', function() {
