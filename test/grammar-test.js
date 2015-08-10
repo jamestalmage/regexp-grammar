@@ -285,6 +285,7 @@ describe('grammar', function() {
         b.charSetUnion(b.charSet(['a']), b.charSet(['b'])), false
       ]
     );
+    console.log('here');
     assert.deepEqual(
       parser.CharacterClass('[ac-f]', options),
       [

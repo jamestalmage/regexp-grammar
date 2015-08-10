@@ -2,25 +2,25 @@ Pattern
   = Disjunction
 
 Disjunction
-  = l: Alternative '|' r: Disjunction { return disjunctionMatcher(l, r); }
+  = l: Alternative '|' r: Disjunction { return b.disjunctionMatcher(l, r); }
   / Alternative
 
 Alternative
-  = t:Term a:Alternative { return alternativeMatcher(t, a); }
-  / '' { return emptyMatcher(); }
+  = t:Term a:Alternative { return b.alternativeMatcher(t, a); }
+  / '' { return b.emptyMatcher(); }
 
 Term
-  = a:Assertion { return assertionMatcher(a); }
-  / m:Atom q:Quantifier { return repeatMatcher(m, q[0], q[1], q[2]); }
+  = a:Assertion { return b.assertionMatcher(a); }
+  / m:Atom q:Quantifier { return b.repeatMatcher(m, q[0], q[1], q[2]); }
   / Atom
 
 Assertion
-  = '^' { return lineStartAssertion(); }
-  / '$' { return lineEndAssertion(); }
-  / '\\b' { return wordBoundaryAssertion(false); }
-  / '\\B' { return wordBoundaryAssertion(true); }
-  / '(?=' d:Disjunction ')' { return lookAheadAssertion(d, false); }
-  / '(?!' d:Disjunction ')' { return lookAheadAssertion(d, true); }
+  = '^' { return b.lineStartAssertion(); }
+  / '$' { return b.lineEndAssertion(); }
+  / '\\b' { return b.wordBoundaryAssertion(false); }
+  / '\\B' { return b.wordBoundaryAssertion(true); }
+  / '(?=' d:Disjunction ')' { return b.lookAheadAssertion(d, false); }
+  / '(?!' d:Disjunction ')' { return b.lookAheadAssertion(d, true); }
 
 Quantifier
   = q:QuantifierPrefix '?' { q.push(false); return q; }
@@ -35,11 +35,11 @@ QuantifierPrefix
   / '{' n:DecimalDigits '}' { return [n, n]; }
 
 Atom
-  = c:PatternCharacter { return charSetMatcher(charSet1(c), false); }
-  / '.' { return charSetMatcher(characterClassEscape('.'), false); }
+  = c:PatternCharacter { return b.charSetMatcher(b.charSet([c]), false); }
+  / '.' { return b.charSetMatcher(characterClassEscape('.'), false); }
   / '\\' m:AtomEscape { return m; }
-  / c:CharacterClass { return charSetMatcher(c[0], c[1]); }
-  / '(' d:Disjunction ')' { return groupMatcher(d); }
+  / c:CharacterClass { return b.charSetMatcher(c[0], c[1]); }
+  / '(' d:Disjunction ')' { return b.groupMatcher(d); }
   / '(?:' d:Disjunction ')' { return d; }
 
 PatternCharacter
@@ -48,12 +48,12 @@ PatternCharacter
 AtomEscape
   = d:DecimalEscape {
     if (typeof d === 'string') {
-      return charSetMatcher(charSet1(d), false);
+      return b.charSetMatcher(b.charSet([d]), false);
     }
-    return backReferenceMatcher(d);
+    return b.backReferenceMatcher(d);
   }
-  / d:CharacterEscape { return charSetMatcher(charSet1(d), false); }
-  / d:CharacterClassEscape { return charSetMatcher(d, false); }
+  / d:CharacterEscape { return b.charSetMatcher(b.charSet([d]), false); }
+  / d:CharacterClassEscape { return b.charSetMatcher(d, false); }
 
 CharacterEscape
   = ControlEscape
@@ -92,32 +92,32 @@ ClassRanges
   / '' { return; }
 
 NonemptyClassRanges
-  = a:ClassAtom '-' b:ClassAtom c:ClassRanges { return charSetUnion(characterRange(a,b), c); }
-  / a:ClassAtom b:NonemptyClassRangesNoDash { return charSetUnion(a,b); }
+  = a:ClassAtom '-' d:ClassAtom c:ClassRanges { return charSetUnion(b.characterRange(a,d), c); }
+  / a:ClassAtom d:NonemptyClassRangesNoDash { return charSetUnion(a, d); }
   / ClassAtom
 
 NonemptyClassRangesNoDash
-  = a:ClassAtomNoDash '-' b:ClassAtom c:ClassRanges { return charSetUnion(characterRange(a,b), c); }
-  / a:ClassAtomNoDash b:NonemptyClassRangesNoDash { return charSetUnion(a,b); }
+  = a:ClassAtomNoDash '-' d:ClassAtom c:ClassRanges { return charSetUnion(b.characterRange(a,d), c); }
+  / a:ClassAtomNoDash d:NonemptyClassRangesNoDash { return charSetUnion(a,d); }
   / ClassAtom
 
 ClassAtom
-  = '-' { return charSet1('-'); }
+  = '-' { return b.charSet(['-']); }
   / ClassAtomNoDash
 
 ClassAtomNoDash
   = '\\' c:ClassEscape { return c; }
-  / c:[^\\\]\-] { return charSet1(c); }
+  / c:[^\\\]\-] { return b.charSet([c]); }
 
 ClassEscape
   = d:DecimalEscape {
       if (typeof d !== 'string') {
         expected('"0" (or something else that escapes to a character)');
       }
-      return charSet1(d);
+      return b.charSet([d]);
     }
-  / 'b' { return charSet1('\u0008'); }
-  / c:CharacterEscape { return charSet1(c); }
+  / 'b' { return b.charSet(['\u0008']); }
+  / c:CharacterEscape { return b.charSet([c]); }
   / CharacterClassEscape
 
 IdentifierStart
