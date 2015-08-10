@@ -10,57 +10,37 @@ describe('grammar', function() {
   });
 
   var b = require('../types').builders;
-  var charSet = b.charSet.bind(b);
   var characterRange = function(min, max) {
     if ('string' === typeof min) {
-      min = charSet([min]);
+      min = b.charSet([min]);
     }
     if ('string' === typeof max) {
-      max = charSet([max]);
+      max = b.charSet([max]);
     }
     return b.characterRange(min, max);
   };
-  var invertCharSet = b.invertCharSet.bind(b);
-  var charSetUnion = b.charSetUnion.bind(b);
-  var charSetMatcher = b.charSetMatcher.bind(b);
-  var backReferenceMatcher = b.backReferenceMatcher.bind(b);
-  var lineStartAssertion = b.lineStartAssertion.bind(b);
-  var lineEndAssertion = b.lineEndAssertion.bind(b);
-  var wordBoundaryAssertion = b.wordBoundaryAssertion.bind(b);
-  var assertionMatcher = b.assertionMatcher.bind(b);
-  var repeatMatcher = b.repeatMatcher.bind(b);
-  var alternativeMatcher = b.alternativeMatcher.bind(b);
-  var emptyMatcher = b.emptyMatcher.bind(b);
-  var disjunctionMatcher = b.disjunctionMatcher.bind(b);
-  var groupMatcher = b.groupMatcher.bind(b); /*  */
 
   var options = {factory: b};
-
-  var spy;
-
-  beforeEach(function() {
-    spy = sinon.spy();
-  });
 
   it('groups', function() {
     assert.deepEqual(
       parser.Pattern('(a|b)+\\1', options),
-      alternativeMatcher(
-        repeatMatcher(groupMatcher(
-          disjunctionMatcher(
-            alternativeMatcher(
-              charSetMatcher(charSet(['a']), false),
-              emptyMatcher()
+      b.alternativeMatcher(
+        b.repeatMatcher(b.groupMatcher(
+          b.disjunctionMatcher(
+            b.alternativeMatcher(
+              b.charSetMatcher(b.charSet(['a']), false),
+              b.emptyMatcher()
             ),
-            alternativeMatcher(
-              charSetMatcher(charSet(['b']), false),
-              emptyMatcher()
+            b.alternativeMatcher(
+              b.charSetMatcher(b.charSet(['b']), false),
+              b.emptyMatcher()
             )
           )
         ), 1, Number.POSITIVE_INFINITY, true),
-        alternativeMatcher(
-          backReferenceMatcher(1),
-          emptyMatcher()
+        b.alternativeMatcher(
+          b.backReferenceMatcher(1),
+          b.emptyMatcher()
         )
       )
     );
@@ -68,20 +48,20 @@ describe('grammar', function() {
     //does not create a group if it's not capturing
     assert.deepEqual(
       parser.Pattern('(?:a|b)+', options),
-      alternativeMatcher(
-        repeatMatcher(
-          disjunctionMatcher(
-            alternativeMatcher(
-              charSetMatcher(charSet(['a']), false),
-              emptyMatcher()
+      b.alternativeMatcher(
+        b.repeatMatcher(
+          b.disjunctionMatcher(
+            b.alternativeMatcher(
+              b.charSetMatcher(b.charSet(['a']), false),
+              b.emptyMatcher()
             ),
-            alternativeMatcher(
-              charSetMatcher(charSet(['b']), false),
-              emptyMatcher()
+            b.alternativeMatcher(
+              b.charSetMatcher(b.charSet(['b']), false),
+              b.emptyMatcher()
             )
           )
         , 1, Number.POSITIVE_INFINITY, true),
-          emptyMatcher()
+          b.emptyMatcher()
       )
     );
   });
@@ -89,33 +69,33 @@ describe('grammar', function() {
   it('Disjunction', function() {
     assert.deepEqual(
       parser.Disjunction('a|b', options),
-      disjunctionMatcher(
-        alternativeMatcher(
-          charSetMatcher(charSet(['a']), false),
-          emptyMatcher()
+      b.disjunctionMatcher(
+        b.alternativeMatcher(
+          b.charSetMatcher(b.charSet(['a']), false),
+          b.emptyMatcher()
         ),
-        alternativeMatcher(
-          charSetMatcher(charSet(['b']), false),
-          emptyMatcher()
+        b.alternativeMatcher(
+          b.charSetMatcher(b.charSet(['b']), false),
+          b.emptyMatcher()
         )
       )
     );
 
     assert.deepEqual(
       parser.Disjunction('ab|cd', options),
-      disjunctionMatcher(
-        alternativeMatcher(
-          charSetMatcher(charSet(['a']), false),
-          alternativeMatcher(
-            charSetMatcher(charSet(['b']), false),
-            emptyMatcher()
+      b.disjunctionMatcher(
+        b.alternativeMatcher(
+          b.charSetMatcher(b.charSet(['a']), false),
+          b.alternativeMatcher(
+            b.charSetMatcher(b.charSet(['b']), false),
+            b.emptyMatcher()
           )
         ),
-        alternativeMatcher(
-          charSetMatcher(charSet(['c']), false),
-          alternativeMatcher(
-            charSetMatcher(charSet(['d']), false),
-            emptyMatcher()
+        b.alternativeMatcher(
+          b.charSetMatcher(b.charSet(['c']), false),
+          b.alternativeMatcher(
+            b.charSetMatcher(b.charSet(['d']), false),
+            b.emptyMatcher()
           )
         )
       )
@@ -125,19 +105,19 @@ describe('grammar', function() {
   it('Alternative', function() {
     assert.deepEqual(
       parser.Alternative('a', options),
-      alternativeMatcher(
-        charSetMatcher(charSet(['a']), false),
-        emptyMatcher()
+      b.alternativeMatcher(
+        b.charSetMatcher(b.charSet(['a']), false),
+        b.emptyMatcher()
       )
     );
 
     assert.deepEqual(
       parser.Alternative('ab', options),
-      alternativeMatcher(
-        charSetMatcher(charSet(['a']), false),
-        alternativeMatcher(
-          charSetMatcher(charSet(['b']), false),
-          emptyMatcher()
+      b.alternativeMatcher(
+        b.charSetMatcher(b.charSet(['a']), false),
+        b.alternativeMatcher(
+          b.charSetMatcher(b.charSet(['b']), false),
+          b.emptyMatcher()
         )
       )
     );
@@ -146,21 +126,21 @@ describe('grammar', function() {
   it('Term', function() {
     assert.deepEqual(
       parser.Term('^', options),
-      assertionMatcher(lineStartAssertion())
+      b.assertionMatcher(b.lineStartAssertion())
     );
 
     assert.deepEqual(
       parser.Term('a+', options),
-      repeatMatcher(
-        charSetMatcher(charSet(['a']), false),
+      b.repeatMatcher(
+        b.charSetMatcher(b.charSet(['a']), false),
         1, Number.POSITIVE_INFINITY, true
       )
     );
 
     assert.deepEqual(
       parser.Term('a{3,5}?', options),
-      repeatMatcher(
-        charSetMatcher(charSet(['a']), false),
+      b.repeatMatcher(
+        b.charSetMatcher(b.charSet(['a']), false),
         3, 5, false
       )
     );
@@ -169,22 +149,22 @@ describe('grammar', function() {
   it('Assertion', function() {
     assert.deepEqual(
       parser.Assertion('^', options),
-      lineStartAssertion()
+      b.lineStartAssertion()
     );
 
     assert.deepEqual(
       parser.Assertion('$', options),
-      lineEndAssertion()
+      b.lineEndAssertion()
     );
 
     assert.deepEqual(
       parser.Assertion('\\b', options),
-      wordBoundaryAssertion(false)
+      b.wordBoundaryAssertion(false)
     );
 
     assert.deepEqual(
       parser.Assertion('\\B', options),
-      wordBoundaryAssertion(true)
+      b.wordBoundaryAssertion(true)
     );
 
     //TODO: lookAhead versions
@@ -245,56 +225,56 @@ describe('grammar', function() {
   it('Atom', function() {
     assert.deepEqual(
       parser.Atom('a', options),
-      charSetMatcher(charSet(['a']), false)
+      b.charSetMatcher(b.charSet(['a']), false)
     );
 
     assert.deepEqual(
       parser.Atom('.', options),
-      charSetMatcher(invertCharSet(
-        charSet(['\u000A', '\u000D', '\u2028', '\u2029'])
+      b.charSetMatcher(b.invertCharSet(
+        b.charSet(['\u000A', '\u000D', '\u2028', '\u2029'])
       ), false)
     );
 
     assert.deepEqual(
       parser.Atom('\\1', options),
-      backReferenceMatcher(1)
+      b.backReferenceMatcher(1)
     );
 
     assert.deepEqual(
       parser.Atom('\\0', options),
-      charSetMatcher(charSet(['\u0000']), false)
+      b.charSetMatcher(b.charSet(['\u0000']), false)
     );
 
     assert.deepEqual(
       parser.Atom('\\f', options),
-      charSetMatcher(charSet(['\f']), false)
+      b.charSetMatcher(b.charSet(['\f']), false)
     );
 
     assert.deepEqual(
       parser.Atom('\\d', options),
-      charSetMatcher(charSet(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']), false)
+      b.charSetMatcher(b.charSet(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']), false)
     );
   });
 
   it('AtomEscape', function() {
     assert.deepEqual(
       parser.AtomEscape('1', options),
-      backReferenceMatcher(1)
+      b.backReferenceMatcher(1)
     );
 
     assert.deepEqual(
       parser.AtomEscape('0', options),
-      charSetMatcher(charSet(['\u0000']), false)
+      b.charSetMatcher(b.charSet(['\u0000']), false)
     );
 
     assert.deepEqual(
       parser.AtomEscape('f', options),
-      charSetMatcher(charSet(['\f']), false)
+      b.charSetMatcher(b.charSet(['\f']), false)
     );
 
     assert.deepEqual(
       parser.AtomEscape('d', options),
-      charSetMatcher(charSet(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']), false)
+      b.charSetMatcher(b.charSet(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']), false)
     );
   });
 
@@ -302,13 +282,13 @@ describe('grammar', function() {
     assert.deepEqual(
       parser.CharacterClass('[ab]', options),
       [
-        charSetUnion(charSet(['a']), charSet(['b'])), false
+        b.charSetUnion(b.charSet(['a']), b.charSet(['b'])), false
       ]
     );
     assert.deepEqual(
       parser.CharacterClass('[ac-f]', options),
       [
-        charSetUnion(charSet(['a']), characterRange('c', 'f')), false
+        b.charSetUnion(b.charSet(['a']), characterRange('c', 'f')), false
       ]
     );
     assert.deepEqual(
@@ -320,9 +300,9 @@ describe('grammar', function() {
     assert.deepEqual(
       parser.CharacterClass('[a-b-c]', options),
       [
-        charSetUnion(
+        b.charSetUnion(
           characterRange('a', 'b'),
-          charSetUnion(charSet(['-']), charSet(['c']))
+          b.charSetUnion(b.charSet(['-']), b.charSet(['c']))
         )
         , false
       ]
@@ -337,128 +317,128 @@ describe('grammar', function() {
 
     assert.deepEqual(
       parser.NonemptyClassRangesNoDash('-', options),
-      charSet(['-'])
+      b.charSet(['-'])
     );
 
     assert.deepEqual(
       parser.NonemptyClassRangesNoDash('a', options),
-      charSet(['a'])
+      b.charSet(['a'])
     );
 
     assert.deepEqual(
       parser.NonemptyClassRangesNoDash('b', options),
-      charSet(['b'])
+      b.charSet(['b'])
     );
 
     assert.deepEqual(
       parser.NonemptyClassRangesNoDash('0', options),
-      charSet(['0'])
+      b.charSet(['0'])
     );
 
     assert.deepEqual(
       parser.NonemptyClassRangesNoDash('\\0', options),
-      charSet(['\u0000'])
+      b.charSet(['\u0000'])
     );
 
     assert.deepEqual(
       parser.NonemptyClassRangesNoDash('\\f', options),
-      charSet(['\f'])
+      b.charSet(['\f'])
     );
 
     assert.deepEqual(
       parser.NonemptyClassRangesNoDash('\\d', options),
-      charSet(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'])
+      b.charSet(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'])
     );
 
     assert.deepEqual(
       parser.NonemptyClassRangesNoDash('\\D', options),
-      invertCharSet(charSet(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']))
+      b.invertCharSet(b.charSet(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']))
     );
   });
 
   it('ClassAtom', function() {
     assert.deepEqual(
       parser.ClassAtom('-', options),
-      charSet(['-'])
+      b.charSet(['-'])
     );
 
     assert.deepEqual(
       parser.ClassAtom('a', options),
-      charSet(['a'])
+      b.charSet(['a'])
     );
 
     assert.deepEqual(
       parser.ClassAtom('b', options),
-      charSet(['b'])
+      b.charSet(['b'])
     );
 
     assert.deepEqual(
       parser.ClassAtom('0', options),
-      charSet(['0'])
+      b.charSet(['0'])
     );
 
     assert.deepEqual(
       parser.ClassAtom('\\0', options),
-      charSet(['\u0000'])
+      b.charSet(['\u0000'])
     );
 
     assert.deepEqual(
       parser.ClassAtom('\\f', options),
-      charSet(['\f'])
+      b.charSet(['\f'])
     );
 
     assert.deepEqual(
       parser.ClassAtom('\\d', options),
-      charSet(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'])
+      b.charSet(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'])
     );
 
     assert.deepEqual(
       parser.ClassAtom('\\D', options),
-      invertCharSet(charSet(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']))
+      b.invertCharSet(b.charSet(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']))
     );
   });
 
   it('ClassAtomNoDash', function() {
     assert.deepEqual(
       parser.ClassAtomNoDash('a', options),
-      charSet(['a'])
+      b.charSet(['a'])
     );
 
     assert.deepEqual(
       parser.ClassAtomNoDash('b', options),
-      charSet(['b'])
+      b.charSet(['b'])
     );
 
     assert.deepEqual(
       parser.ClassAtomNoDash('0', options),
-      charSet(['0'])
+      b.charSet(['0'])
     );
 
     assert.deepEqual(
       parser.ClassAtomNoDash('\\0', options),
-      charSet(['\u0000'])
+      b.charSet(['\u0000'])
     );
 
     assert.deepEqual(
       parser.ClassAtomNoDash('\\f', options),
-      charSet(['\f'])
+      b.charSet(['\f'])
     );
 
     assert.deepEqual(
       parser.ClassAtomNoDash('\\d', options),
-      charSet(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'])
+      b.charSet(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'])
     );
 
     assert.deepEqual(
       parser.ClassAtomNoDash('\\D', options),
-      invertCharSet(charSet(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']))
+      b.invertCharSet(b.charSet(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']))
     );
   });
 
   it('ClassEscape', function() {
     assert.deepEqual(
       parser.ClassEscape('0', options),
-      charSet(['\u0000'])
+      b.charSet(['\u0000'])
     );
 
     assert.throws(function(){
@@ -467,7 +447,7 @@ describe('grammar', function() {
 
     assert.deepEqual(
       parser.ClassEscape('b', options),
-      charSet(['\u0008'])
+      b.charSet(['\u0008'])
     );
 
     assert.throws(function(){
@@ -476,27 +456,27 @@ describe('grammar', function() {
 
     assert.deepEqual(
       parser.ClassEscape('f', options),
-      charSet(['\f'])
+      b.charSet(['\f'])
     );
 
     assert.deepEqual(
       parser.ClassEscape('cm', options),
-      charSet(['\r'])
+      b.charSet(['\r'])
     );
 
     assert.deepEqual(
       parser.ClassEscape('cJ', options),
-      charSet(['\n'])
+      b.charSet(['\n'])
     );
 
     assert.deepEqual(
       parser.ClassEscape('d', options),
-      charSet(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'])
+      b.charSet(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'])
     );
 
     assert.deepEqual(
       parser.ClassEscape('D', options),
-      invertCharSet(charSet(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']))
+      b.invertCharSet(b.charSet(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']))
     );
   });
 
