@@ -4,12 +4,12 @@ describe('grammar', function() {
   var assert = require('assert');
   var makeGrammar = require('../make-grammar');
   var makeParser = require('../make-parser');
+  var b = require('../lib/types').builders;
   var parser = makeParser(makeGrammar(), {
     allRules: true,
     fakeFactory: true
   });
 
-  var b = require('../types').builders;
   var characterRange = function(min, max) {
     if ('string' === typeof min) {
       min = b.charSet([min]);
