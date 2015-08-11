@@ -22,5 +22,5 @@ function charSetUnion(a, c) {
   if (c === undefined) {
     return a;
   }
-  return b.charSetUnion(a, c);
+  return b.charSetUnion([a, c]);
 }

@@ -282,14 +282,14 @@ describe('grammar', function() {
     assert.deepEqual(
       parser.CharacterClass('[ab]', options),
       [
-        b.charSetUnion(b.charSet(['a']), b.charSet(['b'])), false
+        b.charSetUnion([b.charSet(['a']), b.charSet(['b'])]), false
       ]
     );
     console.log('here');
     assert.deepEqual(
       parser.CharacterClass('[ac-f]', options),
       [
-        b.charSetUnion(b.charSet(['a']), characterRange('c', 'f')), false
+        b.charSetUnion([b.charSet(['a']), characterRange('c', 'f')]), false
       ]
     );
     assert.deepEqual(
@@ -301,10 +301,10 @@ describe('grammar', function() {
     assert.deepEqual(
       parser.CharacterClass('[a-b-c]', options),
       [
-        b.charSetUnion(
+        b.charSetUnion([
           characterRange('a', 'b'),
-          b.charSetUnion(b.charSet(['-']), b.charSet(['c']))
-        )
+          b.charSetUnion([b.charSet(['-']), b.charSet(['c'])])
+        ])
         , false
       ]
     );

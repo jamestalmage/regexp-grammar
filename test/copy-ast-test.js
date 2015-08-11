@@ -6,7 +6,7 @@ describe('copy-ast', function() {
   var assert = require('assert');
 
   it('copies things', function() {
-    var original = b.charSetUnion(b.charSet(['a', 'b']), b.charSet(['c', 'd']));
+    var original = b.charSetUnion([b.charSet(['a', 'b']), b.charSet(['c', 'd'])]);
     var copy = copyAST(original);
 
     assert.notEqual(copy, original);
@@ -15,20 +15,22 @@ describe('copy-ast', function() {
 
   it('copies using custom builders', function() {
     var customBuilder = {
-      charSetUnion: function (a, b) {
-        return {a: a, b: b, type: 'CustomUnion'};
+      charSetUnion: function (members) {
+        return {members: members, type: 'CustomUnion'};
       },
       charSet: function (members) {
         return {members: members, type: 'CustomCharSet'};
       }
     };
 
-    var original = b.charSetUnion(b.charSet(['a', 'b']), b.charSet(['c', 'd']));
+    var original = b.charSetUnion([b.charSet(['a', 'b']), b.charSet(['c', 'd'])]);
     var copy = copyAST(original, customBuilder);
 
     assert.deepEqual(copy, {
-      a: {members: ['a', 'b'], type: 'CustomCharSet'},
-      b: {members: ['c', 'd'], type: 'CustomCharSet'},
+      members: [
+        {members: ['a', 'b'], type: 'CustomCharSet'},
+        {members: ['c', 'd'], type: 'CustomCharSet'}
+      ],
       type: 'CustomUnion'
     });
   });
