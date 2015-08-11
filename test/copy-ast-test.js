@@ -1,6 +1,6 @@
 'use strict';
 describe('copy-ast', function() {
-  var types = require('../lib/types');
+  var types = require('../lib/type-definitions');
   var b = types.builders;
   var copyAST = require('../lib/copy-ast');
   var assert = require('assert');
